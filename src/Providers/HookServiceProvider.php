@@ -4,7 +4,8 @@ namespace FriendsOfBotble\Yoomoney\Providers;
 
 use FriendsOfBotble\Yoomoney\Services\Gateways\YoomoneyPaymentService;
 use FriendsOfBotble\Yoomoney\Services\Yoomoney;
-use Botble\Ecommerce\Models\Currency;
+use Botble\Ecommerce\Models\Currency as CurrencyEcommerce;
+use Botble\JobBoard\Models\Currency as CurrencyJobBoard;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Exception;
 use Html;
@@ -124,7 +125,8 @@ class HookServiceProvider extends ServiceProvider
         $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
         if (strtoupper($currentCurrency->title) !== 'RUB') {
-            $supportedCurrency = Currency::query()->where('title', 'RUB')->first();
+            $currency = is_plugin_active('ecommerce') ? CurrencyEcommerce::class : CurrencyJobBoard::class;
+            $supportedCurrency = $currency::query()->where('title', 'RUB')->first();
 
             if ($supportedCurrency) {
                 $paymentData['currency'] = strtoupper($supportedCurrency->title);

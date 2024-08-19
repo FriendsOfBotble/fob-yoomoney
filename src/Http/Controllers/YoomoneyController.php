@@ -53,8 +53,14 @@ class YoomoneyController extends BaseController
 
                 session()->forget('yoomoney_payment_id');
 
+                $nextUrl = PaymentHelper::getRedirectURL($request->input('checkout_token'));
+
+                if (is_plugin_active('job-board')) {
+                    $nextUrl = $nextUrl . '?charge_id=' . $paymentId;
+                }
+
                 return $response
-                    ->setNextUrl(PaymentHelper::getRedirectURL($request->input('checkout_token')))
+                    ->setNextUrl($nextUrl)
                     ->setMessage(__('Checkout successfully!'));
             }
 
