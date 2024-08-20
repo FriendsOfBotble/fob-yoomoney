@@ -2,6 +2,7 @@
 
 namespace FriendsOfBotble\Yoomoney\Http\Controllers;
 
+use Botble\Hotel\Models\Booking;
 use FriendsOfBotble\Yoomoney\Services\Yoomoney;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -9,6 +10,7 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentHelper;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class YoomoneyController extends BaseController
 {
@@ -48,10 +50,26 @@ class YoomoneyController extends BaseController
                     'customer_id' => $request->input('customer_id'),
                     'customer_type' => $request->input('customer_type'),
                     'payment_type' => 'direct',
-                    'order_id' => (array)$request->input('order_ids'),
+                    'order_id' => (array) $orderId = $request->input('order_ids'),
                 ], $request);
 
                 session()->forget('yoomoney_payment_id');
+
+                if (is_plugin_active('hotel')) {
+                    $booking = Booking::query()
+                        ->select('transaction_id')
+                        ->find(Arr::first($orderId));
+
+                    if (! $booking) {
+                        return $response
+                            ->setNextUrl(PaymentHelper::getCancelURL())
+                            ->setMessage(__('Checkout failed!'));
+                    }
+
+                    return $response
+                        ->setNextUrl(PaymentHelper::getRedirectURL($booking->transaction_id))
+                        ->setMessage(__('Checkout successfully!'));
+                }
 
                 $nextUrl = PaymentHelper::getRedirectURL($request->input('checkout_token'));
 
