@@ -1,5 +1,5 @@
 {
-    "id": "friendsofbotble/yoomoney",
+    "id": "friendsofbotble/fob-yoomoney",
     "name": "YooMoney Payment Gateway",
     "namespace": "FriendsOfBotble\\Yoomoney\\",
     "provider": "FriendsOfBotble\\Yoomoney\\Providers\\YoomoneyServiceProvider",
